@@ -1,5 +1,7 @@
 """Preprocessing.py: helper functions for pre-processing."""
 import numpy as np
+
+from typing import List
 from sklearn.metrics.pairwise import pairwise_distances
 
 
@@ -49,3 +51,21 @@ def filter_circles(hough_output: np.ndarray) -> np.ndarray:
         keep[overlapping & (radii[i] >= radii)] = False
 
     return hough_output[keep]
+
+
+def cut_coins(img: np.ndarray, coins_coords: np.ndarray, padding: int = 50) -> List[np.ndarray]:
+
+    coins = []
+
+    for (x, y, r) in coins_coords:
+
+        r_pad = (r + padding)  # calculate radius with padding
+
+        # get bounding box coordinates
+        x_min, x_max = x - r_pad, x + r_pad
+        y_min, y_max = y - r_pad, y + r_pad
+
+        coin = img[y_min:y_max, x_min:x_max]
+        coins.append(coin)
+
+    return coins
