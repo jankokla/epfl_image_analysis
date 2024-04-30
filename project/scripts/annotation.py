@@ -95,7 +95,7 @@ class AnnotationUI:
                 filename = f'coin_{i}.png'
                 cv.imwrite(os.path.join(base_dir, filename), self.coins[i])
 
-                new_row = {'filename': filename, 'label': self.labels[i].strip()}
+                new_row = {'filename': filename, 'label': self.labels[i].replace(' ', '')}
                 labels_df.loc[len(labels_df)] = new_row
 
             labels_df.to_csv('train_annotated/labels.csv')
