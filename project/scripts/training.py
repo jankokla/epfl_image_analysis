@@ -90,7 +90,7 @@ def train_epoch(
             )
         )
 
-    return metric_monitor.averages()
+    return metric_monitor.averages(), 0  # TODO: fix f1 calculation
 
 
 @torch.no_grad()
@@ -131,7 +131,7 @@ def valid_epoch(model, dataloader, criterion, epoch) -> (float, float):
             )
         )
 
-    return metric_monitor.averages()
+    return metric_monitor.averages(), 0  # TODO: fix f1 calculation
 
 
 def train_model(

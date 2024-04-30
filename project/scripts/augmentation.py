@@ -52,3 +52,6 @@ class CoinDataset(Dataset):
             image = self.preprocess(image)
 
         return image, label
+
+    def __len__(self):
+        return len(self.images)
