@@ -1,8 +1,27 @@
 """Preprocessing.py: helper functions for pre-processing."""
 import numpy as np
+import cv2 as cv
 
 from typing import List
 from sklearn.metrics.pairwise import pairwise_distances
+
+
+def resize_image(image: np.ndarray, scale_percent: float = 0.8) -> np.ndarray:
+    """
+    Resize image for Hough Transform, to make it more efficient.
+
+    Args:
+        image (np.ndarray): image to be resized
+        scale_percent (float): 1 = same size, 0.1 = 10% of original
+
+    Returns:
+        resized (np.ndarray): resized image
+    """
+    width = int(image.shape[1] * scale_percent)
+    height = int(image.shape[0] * scale_percent)
+
+    resized = cv.resize(image, (width, height), interpolation=cv.INTER_AREA)
+    return resized
 
 
 def filter_circles(hough_output: np.ndarray) -> np.ndarray:
