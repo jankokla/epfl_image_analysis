@@ -1,9 +1,13 @@
 """annotation.py: gathers helper functions for annotation"""
 import io
+import os
+import shutil
 from typing import List
+import cv2 as cv
 
 import ipywidgets as widgets
 import numpy as np
+import pandas as pd
 from ipywidgets import Layout, GridspecLayout, HBox, VBox
 from PIL import Image
 
@@ -31,9 +35,15 @@ class AnnotationUI:
             layout=Layout(height='auto', width='300px')
         )
 
+        self.grid = GridspecLayout(4, 3, height='300px')
+
         # initiate classification and CTA button
         self._initiate_buttons()
         self._initiate_cta()
+
+        self.labels = []
+
+        self.output = widgets.Output()  # for printing final text
 
     def display(self):
         """
@@ -45,23 +55,57 @@ class AnnotationUI:
         Returns:
             grid (GridSpecLayout): essentially the UI
         """
-        grid = GridspecLayout(4, 3, height='300px')
-        grid[:3, 1:] = self.buttons_vertical
-        grid[:, 0] = self.image_widget
-        grid[3, 2] = self.cta_row
+        self.grid[:3, 1:] = self.buttons_vertical
+        self.grid[:, 0] = self.image_widget
+        self.grid[3, 2] = self.cta_row
 
-        return grid
+        return widgets.VBox([self.grid, self.output])
 
     def on_cta_click(self, button):
         """Callback for saving the annotation and updating the UI."""
+        # get annotation value and add it to annotations
+        toggle_values = [self.euro_buttons.value, self.franc_buttons.value, self.ood_buttons.value]
+        annotation = [v for v in toggle_values if v is not None][0]  # only 1 non-None could exist
+        self.labels.append(annotation)
+
+        # reset toggle buttons
         self.euro_buttons.value = None
         self.franc_buttons.value = None
         self.ood_buttons.value = None
 
-        # TODO: decide on the API solution
-
         self.i += 1
-        self.image_widget.value = self._get_image_bytes()
+
+        if self.i == len(self.coins):  # if all pictures have been annotated
+
+            self.grid.height = '0px'  # hide UI
+
+            # create directory for annotations
+            current_dir = os.getcwd()
+            base_dir = os.path.join(current_dir, r'train_annotated')
+
+            if os.path.exists(base_dir):
+                shutil.rmtree(base_dir)  # remove directory if exists
+
+            os.makedirs(base_dir)
+
+            # create DataFrame for labels
+            labels_df = pd.DataFrame(columns=['filename', 'label'])
+
+            for i in range(len(self.coins)):
+                filename = f'coin_{i}.png'
+                cv.imwrite(os.path.join(base_dir, filename), self.coins[i])
+
+                new_row = {'filename': filename, 'label': self.labels[i].strip()}
+                labels_df.loc[len(labels_df)] = new_row
+
+            labels_df.to_csv('train_annotated/labels.csv')
+
+            with self.output:
+                print("No images left to annotate. "
+                      "Images with their corresponding labels were saved to 'train_annotated/'.")
+
+        else:
+            self.image_widget.value = self._get_image_bytes()  # just get new picture
 
     def on_btn_change(self, change):
         """Callback for keeping only one class selected among different ToggleButtons."""
@@ -98,7 +142,7 @@ class AnnotationUI:
         Since widgets.Image requires certain byte format, take the
             current image and return the byte-version.
         """
-        img = Image.fromarray(self.coins[self.i])
+        img = Image.fromarray(self.coins[self.i][:, :, ::-1])  # bgr -> rgb
 
         # convert PIL Image to a displayable format, e.g., PNG
         with io.BytesIO() as f:
