@@ -1,4 +1,8 @@
 import numpy as np
+import scipy.ndimage as ndi
+
+from skimage.feature import hog
+
 from scripts.descr_preprocessing import extract_circular_region
 
 def descr_area(radius):
@@ -45,4 +49,9 @@ def descr_std_center(img, radius):
 	
 	return descr_std(img_cropped)
 
+def descr_img_smoothness(img):
+	return np.mean(np.absolute(ndi.filters.laplace(img / 255.0)))
+
+def descr_hog(img):
+	return None
 	
