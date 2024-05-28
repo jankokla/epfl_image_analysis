@@ -149,8 +149,12 @@ def apply_closing(img_th, disk_size):
         Image after closing operation
     """
     footprint = disk(disk_size)
+    img_open = np.zeros_like(img_th)
 
-    return closing(img_th, footprint)
+    for channel in range(img_th.shape[2]):
+        img_open[:,:,channel] = closing(img_th[:,:,channel], footprint)
+
+    return img_open
 
 
 def apply_opening(img_th, disk_size=15):
