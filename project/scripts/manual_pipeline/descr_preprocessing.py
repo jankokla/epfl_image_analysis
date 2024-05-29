@@ -1,9 +1,7 @@
 import cv2
 
 import numpy as np
-#import scripts.descriptors as d
 
-from skimage import draw
 from skimage.color import *
 
 def extract_annulus_region(img, xcenter, ycenter, inner_radius, outer_radius):

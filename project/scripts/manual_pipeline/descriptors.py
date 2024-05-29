@@ -4,7 +4,7 @@ import scipy.ndimage as ndi
 from skimage import transform
 from skimage.feature import hog
 
-from scripts.descr_preprocessing import extract_circular_region, extract_annulus_region_by_proportion, extract_center_region_by_proportion
+from scripts.manual_pipeline.descr_preprocessing import extract_circular_region, extract_annulus_region_by_proportion, extract_center_region_by_proportion
 
 def descr_area(radius):
 	return np.pi * radius**2
